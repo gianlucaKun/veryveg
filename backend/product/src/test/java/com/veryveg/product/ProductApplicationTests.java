@@ -1,10 +1,10 @@
-package com.veryveg;
+package com.veryveg.product;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class VeryvegApplicationTests {
+class ProductApplicationTests {
 
 	@Test
 	void contextLoads() {

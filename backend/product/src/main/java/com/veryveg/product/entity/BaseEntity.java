@@ -1,4 +1,5 @@
-package com.veryveg.entity;
+package com.veryveg.product.entity;
+
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
