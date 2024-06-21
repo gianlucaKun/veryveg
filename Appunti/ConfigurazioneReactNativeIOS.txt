@@ -15,7 +15,7 @@ cd MyFoodScannerApp
 npx expo start
 
 
-scan qrCode su iphone dopo aver scaricato expo goo
+scan qrCode su iphone dopo aver scaricato expo go
 
 
 npx expo install expo-barcode-scanner
