@@ -1,0 +1,22 @@
+{
+  "name": "veryveg",
+  "version": "1.0.0",
+  "description": "Vegan Smartphone App",
+  "main": "frontend/main.tsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/react": "~18.2.79",
+    "expo": "^51.0.14",
+    "expo-barcode-scanner": "^13.0.1",
+    "react-native": "^0.74.2",
+    "typescript": "~5.3.3"
+  },
+  "devDependencies": {
+    "metro": "^0.80.9"
+  }
+}
