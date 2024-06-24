@@ -1,9 +1,8 @@
 package com.veryveg.product.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Set;
 
@@ -13,8 +12,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "product")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product extends BaseEntity {
