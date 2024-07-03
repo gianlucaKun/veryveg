@@ -20,12 +20,12 @@ public class ProductService {
 	        return pRepo.findAll();
 	    }
 
-	    public Optional<Product> getProductById(Long id) {
-	        return pRepo.findById(id);
+	    public Product getProductById(Long id) {
+	        return pRepo.findById(id).orElse(null);
 	    }
 
 
-	    public Product saveProduct(Product product) {
+	    public String saveProduct(Product product) {
 	        // Calcolo se il prodotto è vegan o vegetariano in base agli ingredienti
 	        boolean vegan = true;
 	        boolean vegetarian = true;
@@ -42,10 +42,22 @@ public class ProductService {
 	        product.setVegan(vegan);
 	        product.setVegetarian(vegetarian);
 
-	        return pRepo.save(product);
+	        pRepo.save(product);
+	        return product.getName();
 	    }
+	    
+	    
+	    
 
 	    public void deleteProductById(Long id) {
 	    	pRepo.deleteById(id);
 	    }
+
+	    
+		public String getByBarcode(String barcode) {
+			Product finded = pRepo.findByBarcode(barcode);
+			
+			return finded.getName();
+		}
+
 }

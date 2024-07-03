@@ -19,6 +19,7 @@ public class Product extends BaseEntity {
 
     private String name;
     private String description;
+    
     private String barcode;
     private boolean vegan;
     private boolean vegetarian;

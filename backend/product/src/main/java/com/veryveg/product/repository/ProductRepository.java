@@ -6,5 +6,7 @@ import com.veryveg.product.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long>{
 
+	Product findByBarcode(String barcode);
+
 	
 }
