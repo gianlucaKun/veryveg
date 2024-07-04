@@ -19,6 +19,16 @@ export const getProduct = async (barcode): Promise<Product> => {
         throw e;
     }
 }
+export const testApi = async () => {
+    try {
+        const response = await axios.get(`${PRODUCT_URL}/test`);
+        return response ;
+    } catch (e) {
+        console.error("errore durante il test api");
+        throw e;
+    }
+}
+
 
 export const addProduct = async (product: Product): Promise<Product> => {
     try {

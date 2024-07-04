@@ -1,43 +1,49 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, Dimensions, Alert } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
-import prodotti from '../../other/datiRandom.json';
-import AggiungiProdotto from '../forms/formAddProduct';
+import { Product, getProduct, addProduct } from '../../services/BarcodeAPI';
+import AddProductForm from '../forms/AddProductForm';
 
 const Scanner: React.FC = () => {
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState<string>('');
   const [isScanning, setIsScanning] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [productNotFound, setProductNotFound] = useState(false);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
     setScannedData(data);
     setIsScanning(false);
 
-    const prodotto = prodotti.prodotti.find(p => p.codice === data);
-    const nomeProdotto = prodotto ? prodotto.nome : null;
-
-    if (nomeProdotto) {
-      Alert.alert(
-        `${nomeProdotto}`,
-        `Codice a barre con identificativo ${data} è stato scansionato!`
-      );
-    } else {
-      Alert.alert(
-        'Prodotto non trovato',
-        `Codice a barre tipo ${type} e con identificativo ${data} non è stato trovato. Vuoi aggiungere questo prodotto?`,
-        [
-          { text: 'No', onPress: () => console.log('Aggiunta prodotto annullata'), style: 'cancel' },
-          { text: 'Sì', onPress: () => handleAddProduct(data) },
-        ]
-      );
+    try {
+      const product = await getProduct(data);
+      if (product) {
+        Alert.alert(
+          `${product.name}`,
+          `Codice a barre con identificativo ${data} è stato scansionato!`
+        );
+      } else {
+        setProductNotFound(true);
+      }
+    } catch (error) {
+      console.error('Errore durante la ricerca del prodotto:', error);
+      Alert.alert('Errore', 'Si è verificato un problema durante la ricerca del prodotto.' + data);
     }
   };
 
-  const handleAddProduct = (barcode: string) => {
-
-  } 
+  const handleAddProduct = async (newProduct: Product) => {
+    try {
+      const addedProduct = await addProduct(newProduct);
+      console.log('Prodotto aggiunto:', addedProduct);
+      setProductNotFound(false);
+      setShowAddProduct(false);
+      Alert.alert('Prodotto Aggiunto', `Il prodotto con barcode ${scannedData} è stato aggiunto.`);
+    } catch (error) {
+      console.error('Errore durante l\'aggiunta del prodotto:', error);
+      Alert.alert('Errore', 'Si è verificato un problema durante l\'aggiunta del prodotto.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -54,6 +60,13 @@ const Scanner: React.FC = () => {
           <Button title="Scansiona un prodotto" onPress={() => setIsScanning(true)} />
           {scanned && <Button title="Scansiona di nuovo" onPress={() => setScanned(false)} />}
           {scannedData ? <Text>Dati scansionati: {scannedData}</Text> : null}
+          {productNotFound && (
+            <AddProductForm
+              code={scannedData}
+              onAddProduct={handleAddProduct}
+              onCancel={() => setProductNotFound(false)}
+            />
+          )}
         </>
       )}
     </View>
@@ -84,4 +97,3 @@ const styles = StyleSheet.create({
 });
 
 export default Scanner;
-11

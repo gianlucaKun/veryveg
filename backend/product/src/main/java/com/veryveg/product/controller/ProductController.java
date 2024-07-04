@@ -26,7 +26,14 @@ public class ProductController {
 	
 	@GetMapping
 	public String getByCode (@RequestParam("barcode") String barcode) {
+		System.out.println("BARCODE : " + barcode);
 		return pService.getByBarcode(barcode);
+	}
+
+	@GetMapping("/test")
+	public String test () {
+		System.out.println("TEST ");
+		return "test";
 	}
 
 }
