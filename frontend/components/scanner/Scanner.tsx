@@ -36,7 +36,7 @@ const Scanner: React.FC = () => {
   };
 
   const handleAddProduct = (barcode: string) => {
-    
+
   } 
 
   return (

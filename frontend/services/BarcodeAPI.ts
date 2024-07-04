@@ -3,7 +3,6 @@ import axios from "axios";
 const PRODUCT_URL = "http://localhost:8080/product";
 
 export interface Product {
-    id: number;
     name: string;
     barcode: string;
     description: string;
