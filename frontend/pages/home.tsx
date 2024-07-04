@@ -38,7 +38,7 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#3FA34D',
     alignItems: 'center',
     justifyContent: 'center',
   },

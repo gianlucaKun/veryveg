@@ -57,8 +57,22 @@ const Scanner: React.FC = () => {
         </View>
       ) : (
         <>
-          <Button title="Scansiona un prodotto" onPress={() => setIsScanning(true)} />
-          {scanned && <Button title="Scansiona di nuovo" onPress={() => setScanned(false)} />}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Scansiona un prodotto"
+              onPress={() => setIsScanning(true)}
+              color="#FFFFFF" // Colore del testo del pulsante
+            />
+          </View>
+          {scanned && (
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Scansiona di nuovo"
+                onPress={() => setScanned(false)}
+                color="#FFFFFF" // Colore del testo del pulsante
+              />
+            </View>
+          )}
           {scannedData ? <Text>Dati scansionati: {scannedData}</Text> : null}
           {productNotFound && (
             <AddProductForm
@@ -71,14 +85,14 @@ const Scanner: React.FC = () => {
       )}
     </View>
   );
+  
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#3FA34D',
   },
   scannerContainer: {
     flex: 1,
@@ -94,6 +108,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
     padding: 10,
   },
+  scannerButton: {
+    borderWidth: 3,
+    borderColor: 'black',
+    marginVertical: 10,
+    paddingHorizontal: 20,
+  },
+  buttonContainer: {
+    marginVertical: 10, 
+    width: '80%',
+  },
 });
+
 
 export default Scanner;
