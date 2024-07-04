@@ -1,5 +1,6 @@
 package com.veryveg.product.service;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.veryveg.product.entity.Ingredient;
 import com.veryveg.product.entity.Product;
 import com.veryveg.product.repository.ProductRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProductService {
@@ -25,17 +28,26 @@ public class ProductService {
 	    }
 
 
+	    @Transactional
 	    public String saveProduct(Product product) {
-	        // Calcolo se il prodotto è vegan o vegetariano in base agli ingredienti
+	        // Verifica se il set di ingredienti è nullo e inizializzalo se necessario
+	        if (product.getIngredients() == null) {
+	            product.setIngredients(new HashSet<>());
+	        }
+
+	        // Calcola se il prodotto è vegan o vegetariano in base agli ingredienti
 	        boolean vegan = true;
 	        boolean vegetarian = true;
 
-	        for (Ingredient ingredient : product.getIngredients()) {
-	            if (!ingredient.isVegan()) {
-	                vegan = false;
-	            }
-	            if (!ingredient.isVegetarian()) {
-	                vegetarian = false;
+	        // Se ci sono ingredienti, calcola vegan e vegetarian
+	        if (!product.getIngredients().isEmpty()) {
+	            for (Ingredient ingredient : product.getIngredients()) {
+	                if (!ingredient.isVegan()) {
+	                    vegan = false;
+	                }
+	                if (!ingredient.isVegetarian()) {
+	                    vegetarian = false;
+	                }
 	            }
 	        }
 
@@ -45,7 +57,7 @@ public class ProductService {
 	        pRepo.save(product);
 	        return product.getName();
 	    }
-	    
+
 	    
 	    
 

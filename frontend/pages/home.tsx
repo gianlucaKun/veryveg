@@ -1,27 +1,52 @@
-// HomeScreen.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-
-import AggiungiProdotto from '../components/forms/formAddProduct';
-
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import Scanner from '../components/scanner/Scanner';
 
 const HomeScreen: React.FC = () => {
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  if (hasPermission === null) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Text>Richiesta di autorizzazione della fotocamera</Text>
+      </View>
+    );
+  }
+  if (hasPermission === false) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Text>Nessun accesso alla fotocamera</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={style.body}>
-      <Text>Home Screen</Text>
-      <Text>bla bla bla</Text>
+    <View style={styles.body}>
+      <Scanner />
     </View>
   );
 };
 
-export default HomeScreen;
-
-const style = StyleSheet.create({
-  body : {
-    marginTop : 50,
-    height : '100%',
-    backgroundColor: '#343434',
-    display: 'flex',
+const styles = StyleSheet.create({
+  body: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
 });
+
+export default HomeScreen;
