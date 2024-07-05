@@ -19,8 +19,9 @@ const Scanner: React.FC = () => {
     try {
       const product = await getProduct(data);
       if (product) {
+        console.log(product);
         Alert.alert(
-          `${product.name}`,
+          `${product}`,
           `Codice a barre con identificativo ${data} è stato scansionato!`
         );
       } else {

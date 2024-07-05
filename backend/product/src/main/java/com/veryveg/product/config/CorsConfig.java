@@ -14,11 +14,13 @@ public class CorsConfig {
 		return new WebMvcConfigurer() {
 
 			@Override
-			public void addCorsMappings(CorsRegistry registry) { //httplocalhost funzionante se apri FE dal pc, le altre due test ma non funzionano
-				registry.addMapping("/**").allowedOrigins("http://localhost:8081", "http://192.168.1.9:8081", "exp://192.168.1.9:8081")
-
-						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowedHeaders("*")
-						.allowCredentials(true);
+			public void addCorsMappings(CorsRegistry registry) { // httplocalhost funzionante se apri FE dal pc, le
+																	// altre due test ma non funzionano
+																	// http://localhost:8081",
+																	// "http://192.168.1.9:8081",
+																	// "exp://192.168.1.9:8081
+				registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+						.allowedHeaders("*").allowCredentials(false);
 			}
 		};
 	}

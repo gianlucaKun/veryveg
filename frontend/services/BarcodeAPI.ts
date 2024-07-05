@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const PRODUCT_URL = "http://localhost:8080/product";
+const PRODUCT_URL = "http://192.168.1.9:8080/product";
 
 export interface Product {
     name: string;
@@ -24,7 +24,7 @@ export const testApi = async () => {
         const response = await axios.get(`${PRODUCT_URL}/test`);
         return response ;
     } catch (e) {
-        console.error("errore durante il test api");
+        console.error("errore durante il test api", e);
         throw e;
     }
 }
