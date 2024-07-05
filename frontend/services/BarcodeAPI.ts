@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const PRODUCT_URL = "http://192.168.1.9:8080/product";
-//const PRODUCT_URL = "http://192.168.1.53:8080/product";
+//const PRODUCT_URL = "http://192.168.1.9:8080/product";
+const PRODUCT_URL = "http://192.168.1.53:8080/product";
 
 export interface Product {
     name: string;
