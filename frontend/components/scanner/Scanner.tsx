@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, Dimensions, Alert, KeyboardAvoidingView } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Product, getProduct, addProduct } from '../../services/BarcodeAPI';
 import AddProductForm from '../forms/AddProductForm';
@@ -25,11 +25,15 @@ const Scanner: React.FC = () => {
           `Codice a barre con identificativo ${data} è stato scansionato!`
         );
       } else {
+        console.log("prodotto non trovato con il barcode : " , data)
         setProductNotFound(true);
+        setShowAddProduct(true);
       }
     } catch (error) {
       console.error('Errore durante la ricerca del prodotto:', error);
       Alert.alert('Errore', 'Si è verificato un problema durante la ricerca del prodotto.' + data);
+      setProductNotFound(true);
+      setShowAddProduct(true);
     }
   };
 
@@ -42,11 +46,11 @@ const Scanner: React.FC = () => {
       Alert.alert('Prodotto Aggiunto', `Il prodotto con barcode ${scannedData} è stato aggiunto.`);
     } catch (error) {
       console.error('Errore durante l\'aggiunta del prodotto:', error);
-      Alert.alert('Errore', 'Si è verificato un problema durante l\'aggiunta del prodotto.');
     }
   };
 
   return (
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
     <View style={styles.container}>
       {isScanning ? (
         <View style={styles.scannerContainer}>
@@ -75,16 +79,17 @@ const Scanner: React.FC = () => {
             </View>
           )}
           {scannedData ? <Text>Dati scansionati: {scannedData}</Text> : null}
-          {productNotFound && (
+          {showAddProduct  && (
             <AddProductForm
               code={scannedData}
               onAddProduct={handleAddProduct}
-              onCancel={() => setProductNotFound(false)}
+              onCancel={() =>{ setProductNotFound(false);  setShowAddProduct(false);}}
             />
           )}
         </>
       )}
     </View>
+    </KeyboardAvoidingView>
   );
   
 };

@@ -20,6 +20,7 @@ public class ProductController {
 	
 	@PostMapping("/add")
 	public String addController (@RequestBody Product p) {
+		System.out.println("prodotto da aggiungere: " + p);
 		return pService.saveProduct(p);
 	}
 	

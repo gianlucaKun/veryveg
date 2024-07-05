@@ -32,7 +32,8 @@ export const testApi = async () => {
 
 export const addProduct = async (product: Product): Promise<Product> => {
     try {
-        const response = await axios.post(PRODUCT_URL, product);
+        console.log ("product: ", product);
+        const response = await axios.post(`${PRODUCT_URL}/add`, product);
         return response.data as Product;
     } catch (e) {
         console.error("Errore durante l'aggiunta del prodotto: " + JSON.stringify(product));
