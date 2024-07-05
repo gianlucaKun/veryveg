@@ -1,29 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Alert, ImageBackground, StyleSheet, Dimensions } from 'react-native';
-import { testApi } from '../services/BarcodeAPI';
+import { prodottoveryveg } from '../models/products';
+
+import { getAll_product } from '../services/ProductAPI';
+
+import SchedaProdotto from '../components/schede/schedaProdotto';
 
 const { width, height } = Dimensions.get('window');
 
 const DetailsScreen: React.FC = () => {
 
-    const handleTestApi = async () => {
+    const [lista, setLista] = useState<prodottoveryveg[]>([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const products = await getAll_product();
+                setLista(products);
+            } catch (error) {
+                console.error("Errore nel recupero dei prodotti", error);
+            }
+        };
+        fetchProducts();
+    }, []);
+
+    const getProductV2 = async () => {
         try {
-            const response = await testApi();
-            Alert.alert('Test API', 'Test API completato con successo.');
-            console.log('Risposta test API:', response);
+            const products = await getAll_product();
+            setLista(products);
         } catch (error) {
-            console.error('Errore durante il test dell\'API:', error);
-            Alert.alert('Errore', 'Si è verificato un problema durante il test dell\'API.');
+            console.error("Errore nel recupero dei prodotti", error);
         }
-    };
+    }
 
     return (
         <ImageBackground source={require('../assets/leaf.png')} style={styles.backgroundImage}>
             <View style={styles.overlay}>
                 <View style={styles.container}>
-                    <Text>Details Screen</Text>
-                    <Button title="Test API" onPress={handleTestApi} />
-                </View>
+                    <Button title="Ricevi prodotti" onPress={getProductV2}/>
+                    <Text>Lista prodotti scansionati</Text>
+                    {lista.map((prodotto, index) => (
+                        <View key={index}>
+                            <SchedaProdotto description={prodotto.description} name={prodotto.name} vegan={prodotto.vegan} vegetarian={prodotto.vegetarian}/>
+                        </View>))}
+            </View>
             </View>
         </ImageBackground>
     );

@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const PRODUCT_URL = "http://192.168.1.9:8080/product";
+//const PRODUCT_URL = "http://192.168.1.53:8080/product";
 
 export interface Product {
     name: string;
@@ -19,6 +20,7 @@ export const getProduct = async (barcode): Promise<Product> => {
         throw e;
     }
 }
+/*
 export const testApi = async () => {
     try {
         const response = await axios.get(`${PRODUCT_URL}/test`);
@@ -27,7 +29,7 @@ export const testApi = async () => {
         console.error("errore durante il test api", e);
         throw e;
     }
-}
+}*/
 
 
 export const addProduct = async (product: Product): Promise<Product> => {

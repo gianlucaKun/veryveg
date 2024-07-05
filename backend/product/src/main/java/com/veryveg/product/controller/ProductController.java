@@ -36,5 +36,10 @@ public class ProductController {
 		System.out.println("TEST ");
 		return "test";
 	}
+	
+	@GetMapping("/getAllProduct")
+	public  Iterable<Product> getAll () {
+		return pService.getAllProducts();
+	}
 
 }
