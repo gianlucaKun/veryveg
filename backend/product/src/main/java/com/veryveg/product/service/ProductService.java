@@ -51,8 +51,8 @@ public class ProductService {
 	            }
 	        }
 
-	        product.setVegan(vegan);
-	        product.setVegetarian(vegetarian);
+//	        product.setVegan(vegan);
+//	        product.setVegetarian(vegetarian);
 
 	        pRepo.save(product);
 	        return product.getName();
