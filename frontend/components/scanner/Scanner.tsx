@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, Dimensions, Alert, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, Button, Dimensions, KeyboardAvoidingView, Alert } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Product, getProduct, addProduct } from '../../services/BarcodeAPI';
 import AddProductForm from '../forms/AddProductForm';
+import ProductDetails from '../productDetails/ProductDetails';
 
 const Scanner: React.FC = () => {
   const [scanned, setScanned] = useState(false);
@@ -10,6 +11,7 @@ const Scanner: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [productNotFound, setProductNotFound] = useState(false);
+  const [productDetails, setProductDetails] = useState<Product | null>(null); // Stato per memorizzare i dettagli del prodotto trovato
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
@@ -19,13 +21,10 @@ const Scanner: React.FC = () => {
     try {
       const product = await getProduct(data);
       if (product) {
-        console.log(product);
-        Alert.alert(
-          `${product}`,
-          `Codice a barre con identificativo ${data} è stato scansionato!`
-        );
+        console.log('Prodotto trovato:', product);
+        setProductDetails(product); // Memorizza i dettagli del prodotto trovato nello stato
       } else {
-        console.log("prodotto non trovato con il barcode : " , data)
+        console.log('Prodotto non trovato con il barcode:', data);
         setProductNotFound(true);
         setShowAddProduct(true);
       }
@@ -49,50 +48,60 @@ const Scanner: React.FC = () => {
     }
   };
 
+  const handleResetScanner = () => {
+    setScanned(false);
+    setScannedData('');
+    setProductDetails(null); // Resetta anche i dettagli del prodotto
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
-    <View style={styles.container}>
-      {isScanning ? (
-        <View style={styles.scannerContainer}>
-          <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            style={StyleSheet.absoluteFillObject}
-          />
-          <Button title="x" onPress={() => setIsScanning(false)} style={styles.exitButton} />
-        </View>
-      ) : (
-        <>
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Scansiona un prodotto"
-              onPress={() => setIsScanning(true)}
-              color="#FFFFFF" // Colore del testo del pulsante
+      <View style={styles.container}>
+        {isScanning ? (
+          <View style={styles.scannerContainer}>
+            <BarCodeScanner
+              onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+              style={StyleSheet.absoluteFillObject}
             />
+            <Button title="x" onPress={() => setIsScanning(false)} style={styles.exitButton} />
           </View>
-          {scanned && (
+        ) : (
+          <>
             <View style={styles.buttonContainer}>
               <Button
-                title="Scansiona di nuovo"
-                onPress={() => setScanned(false)}
-                color="#FFFFFF" // Colore del testo del pulsante
+                title="Scansiona un prodotto"
+                onPress={() => setIsScanning(true)}
+                color="#FFFFFF"
               />
             </View>
-          )}
-          {scannedData ? <Text>Dati scansionati: {scannedData}</Text> : null}
-          {showAddProduct  && (
-            <AddProductForm
-              code={scannedData}
-              onAddProduct={handleAddProduct}
-              onCancel={() =>{ setProductNotFound(false);  setShowAddProduct(false);}}
-            />
-          )}
-        </>
-      )}
-    </View>
+            {scanned && (
+              <View style={styles.buttonContainer}>
+                <Button
+                  title="Scansiona di nuovo"
+                  onPress={handleResetScanner}
+                  color="#FFFFFF"
+                />
+              </View>
+            )}
+            {scannedData ? <Text>Dati scansionati: {scannedData}</Text> : null}
+            {/* Mostra i dettagli del prodotto trovato */}
+            {productDetails && (
+              <ProductDetails product={productDetails} />
+            )}
+            {showAddProduct && (
+              <AddProductForm
+                code={scannedData}
+                onAddProduct={handleAddProduct}
+                onCancel={() => { setProductNotFound(false); setShowAddProduct(false); }}
+              />
+            )}
+          </>
+        )}
+      </View>
     </KeyboardAvoidingView>
   );
-  
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -121,10 +130,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   buttonContainer: {
-    marginVertical: 10, 
+    marginVertical: 10,
     width: '80%',
   },
 });
-
 
 export default Scanner;

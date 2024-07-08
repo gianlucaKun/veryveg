@@ -66,10 +66,10 @@ public class ProductService {
 	    }
 
 	    
-		public String getByBarcode(String barcode) {
+		public Product getByBarcode(String barcode) {
 			Product finded = pRepo.findByBarcode(barcode);
 			
-			return finded.getName();
+			return finded;
 		}
 
 }
