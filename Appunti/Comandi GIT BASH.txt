@@ -1,0 +1,80 @@
+Comandi GIT BASH
+
+clona repository:
+git clone https://github.com/tuo-utente/nome-repo.git
+
+
+#Oppure, per clonare una repository utilizzando SSH:
+
+sh
+Copia codice
+git clone git@github.com:tuo-utente/nome-repo.git
+
+
+#NUOVA CARTELLA 
+
+mkdir nuova-cartella
+
+#verificare lista
+
+ls
+
+#Creare file
+
+cd nuova-cartella
+touch nuovo-file.txt
+
+
+procedura COMMIT
+
+git add nuova-cartella/   -> aggiunge tutti i file
+
+git add nuova-cartella/nuovo-file.txt
+
+git commit -m "messaggio"
+
+git push
+
+#es completo:
+
+cd /c/Users/tuo-nome-utente/repository/veryveg  # Assicurati di essere nella cartella della tua repository clonata
+mkdir nuova-cartella  # Crea la nuova cartella
+cd nuova-cartella  # Entra nella nuova cartella
+touch nome-file.txt  # Crea un nuovo file all'interno della nuova cartella
+
+# Aggiungi la nuova cartella e il file alla staging area
+git add nuova-cartella/
+git add nuova-cartella/nome-file.txt
+
+# Esegui il commit delle modifiche
+git commit -m "Aggiunta nuova cartella 'nuova-cartella' e file 'nome-file.txt'"
+
+# Push delle modifiche al repository remoto su GitHub
+git push
+
+
+###   BRANCH  ###
+
+# Visualizza percorso
+
+pwd
+
+# Verifica lo stato
+
+git status
+
+# Crea Branch
+
+git branch nuovo-feature
+
+# Passa al nuovo branche
+
+git checkout nuovo-feature
+
+# creare e passare al branch
+
+git checkout -b nuovo-feature
+
+#verifica sul branch in cui ti trovi
+
+git branch -v
