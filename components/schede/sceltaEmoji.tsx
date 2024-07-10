@@ -22,7 +22,7 @@ const SceltaEmoji: React.FC<sceltaEmojiProps> = ({risultato , colore}) => {
             return (<Entypo name="emoji-flirt" size={36} color={colore} />);
         break;
         case '?':
-            return (<FontAwesome6 name="circle-question" size={36} color={colore} />);
+            return (<FontAwesome6 name="circle-question" size={36} color='#926FFF' />);
         break
     }
 }

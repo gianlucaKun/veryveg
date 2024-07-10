@@ -26,6 +26,13 @@ const Layout = () => {
           title: "",
         }}
       />
+      <Tabs.Screen 
+        name="hiddenDatails"
+        options={{
+          title: "",
+          href: null,
+        }}
+      />
     </Tabs>
   );
 };

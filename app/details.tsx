@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Alert, ImageBackground, StyleSheet, Dimensions, FlatList } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet, Dimensions, FlatList } from 'react-native';
 import { prodottoveryveg } from '../models/products';
-import { getAll_product} from '../services/ProductAPI'
+import { getAll_product } from '../services/ProductAPI';
 import SchedaProdottoTimeLine from '@/components/schede/SchedaProdottoTimeline';
+import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,16 +29,36 @@ const DetailsScreen: React.FC = () => {
         } catch (error) {
             console.error("Errore nel recupero dei prodotti", error);
         }
-    }
+    };
+
+    const router = useRouter();
+
+    const navigateToHiddenPage = (prodotto: prodottoveryveg) => {
+        router.push({
+            pathname: 'hiddenDatails',
+            params: { product: JSON.stringify(prodotto) },
+        }); // Naviga alla pagina nascosta
+    };
 
     return (
-            <View style={styles.overlay}>
-                <View style={styles.container}>
-                    <Button title="Ricevi prodotti" onPress={getProductV2} />
-                    <Text style={styles.title}>Lista prodotti scansionati</Text>
-                    {lista.map( p => <SchedaProdottoTimeLine prodotto={p} colore='#F2D6FF'/>)}
-                </View>
+        <View style={styles.overlay}>
+            <View style={styles.container}>
+                <Button title="Ricevi prodotti" onPress={getProductV2} />
+                <Text style={styles.title}>Lista prodotti scansionati</Text>
+                <FlatList
+                    data={lista}
+                    keyExtractor={(item) => item.barcode || item.name}
+                    renderItem={({ item }) => (
+                        <SchedaProdottoTimeLine 
+                            prodotto={item} 
+                            colore='#F2D6FF' 
+                            onClick={() => navigateToHiddenPage(item)} 
+                        />
+                    )}
+                    contentContainerStyle={styles.list}
+                />
             </View>
+        </View>
     );
 };
 

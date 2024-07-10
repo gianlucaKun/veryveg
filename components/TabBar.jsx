@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState} from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -7,17 +7,39 @@ const TabBar = ({ state, descriptors, navigation }) => {
   const icons = {
     details: (props) => <MaterialIcons name="details" size={36} color="black" {...props} />,
     home: (props) => <AntDesign name="home" size={36} color="white" {...props} />,
-    scansiona: (props) => <MaterialIcons name="add-circle-outline" size={36} color="black" {...props}/>
+    scansiona: (props) => <MaterialIcons name="add-circle-outline" size={36} color="black" {...props}/>,
+    hiddenDatails: (props) => <MaterialIcons name="add-circle-outline" size={36} color="black" {...props}/>
   };
 
   const indicatorPosition = useRef(new Animated.Value(0)).current;
 
+  const [pos,setPos] = useState(0);
+
   useEffect(() => {
+    // Calcola la posizione desiderata dell'indicatore in base a state.index
+    let newPosition = pos
+    switch (state.index) {
+      case 0:
+        setPos(0); // Posizione desiderata per il primo tab
+        break;
+      case 1:
+        setPos(1); // Posizione desiderata per il secondo tab
+        break;
+      case 2:
+        setPos(2); // Posizione desiderata per il terzo tab
+        break;
+      default:
+        newPosition = pos; // Gestione di altri indici non previsti
+        break;
+    }
+  
+    // Esegui l'animazione per spostare l'indicatore alla nuova posizione
     Animated.spring(indicatorPosition, {
-      toValue: state.index,
+      toValue: newPosition,
       useNativeDriver: false,
     }).start();
-  }, [state.index]);
+  }, [state.index, pos]);
+  
 
   const translateX = indicatorPosition.interpolate({
     inputRange: [0, 1, 2],
@@ -35,7 +57,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
           ? options.title
           : route.name;
 
-        if (['_sitemap', '+not-found'].includes(route.name)) return null;
+        if (['_sitemap', '+not-found', 'hiddenDatails'].includes(route.name)) return null;
 
         const isFocused = state.index === index;
 
@@ -106,9 +128,11 @@ const styles = StyleSheet.create({
   },
   focus: {
     color: '#673ab7',
+    zIndex:10,
   },
   noFocus: {
     color: '#fff',
+    zIndex:10
   },
   indicator: {
     position: 'absolute',
@@ -116,8 +140,9 @@ const styles = StyleSheet.create({
     left: 35,
     width: 60, // Assuming you have two tabs
     height: 60,
-    backgroundColor: '#fff',
+    backgroundColor: '#F2D6FF',
     borderRadius: 200,
+    zIndex:0
   },
 });
 

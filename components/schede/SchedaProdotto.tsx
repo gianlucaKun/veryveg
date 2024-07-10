@@ -28,7 +28,7 @@ const SchedaProdotto : React.FC<BottoneProps> = ({stile, onClick, isNew, prodott
     return (
       <TouchableOpacity style={stile ? stile : styles.buttonContainer} onPress={onClick}>
         <SceltaEmoji risultato={'flirt'}/>
-        <Text style={styles.testo}>prodotto non presente</Text>
+        <Text style={styles.testo}>prodotto non presente !</Text>
       </TouchableOpacity>
     );
   } else if (prodotto?.name === undefined) {
