@@ -3,8 +3,8 @@
 import { prodottoveryveg } from "../models/products"
 import axios from 'axios'
 
-const baseUrl = "http://192.168.1.53:8080/product"; //per Andriy
-//const baseUrl = "http://192.168.1.9:8080/product/getAllProduct"; //per Gianluca
+//const baseUrl = "http://192.168.1.53:8080/product"; //per Andriy
+const baseUrl = "http://192.168.1.9:8080/product"; //per Gianluca
 
 export const getAll_product = async () :  Promise<prodottoveryveg[]> => {
     const response = await axios.get(baseUrl+'/getAllProduct');
