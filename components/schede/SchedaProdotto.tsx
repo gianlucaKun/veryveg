@@ -2,15 +2,26 @@ import { View, Text, StyleProp, ViewStyle, TouchableOpacity, StyleSheet } from '
 import React, {useState, useEffect}from 'react';
 import SceltaEmoji from './sceltaEmoji';
 import { prodottoveryveg } from '@/models/products';
+import { useRouter } from 'expo-router';
 
 interface BottoneProps {
   stile?: StyleProp<ViewStyle>;
   onClick?: () => void;
   isNew?: boolean;
   prodotto?: prodottoveryveg;
+  barCode: string;
 }
 
-const SchedaProdotto : React.FC<BottoneProps> = ({stile, onClick, isNew, prodotto }) => {
+const SchedaProdotto : React.FC<BottoneProps> = ({stile, onClick, isNew, prodotto, barCode }) => {
+
+  const router = useRouter();
+
+const navigateToAddProduct = ( codice : string) => {
+    router.push({
+      pathname: 'aggiungi',
+      params: { codice },
+  }); // Naviga alla pagina nascosta
+};
 
   const [risultato, setRisultato] = useState<string>(''); //per settare emoji
 
@@ -24,11 +35,14 @@ const SchedaProdotto : React.FC<BottoneProps> = ({stile, onClick, isNew, prodott
     }
   },[])
 
-  if(isNew){
+  if (isNew) {
     return (
-      <TouchableOpacity style={stile ? stile : styles.buttonContainer} onPress={onClick}>
-        <SceltaEmoji risultato={'flirt'}/>
-        <Text style={styles.testo}>prodotto non presente !</Text>
+      <TouchableOpacity
+        style={stile ? stile : styles.buttonContainer}
+        onPress={() => barCode !== undefined ? navigateToAddProduct(barCode) : null}
+      >
+        <SceltaEmoji risultato={'flirt'} />
+        <Text style={styles.testo}>Prodotto non presente!</Text>
       </TouchableOpacity>
     );
   } else if (prodotto?.name === undefined) {

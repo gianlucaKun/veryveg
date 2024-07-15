@@ -16,13 +16,12 @@ const Scanner: React.FC = () => {
   const [scanner, setScanner] = useState<boolean>(false);
   const [prodotto, setProdotto] = useState<prodottoveryveg>();
   const [camera, setCamera] = useState<boolean>(true);
-  const [barCode, setBarCode] = useState<string | undefined>(undefined);
+  const [barCode, setBarCode] = useState<string>();
   const [notFound, setNotFound] = useState<boolean>(false);
-
+  const [dataB, setData] = useState<string>();
 
   const [lista, setLista] = useState<prodottoveryveg[]>([]); //lista ultimi codici scansionati
   const [addingProduct, setAddingProduct] = useState(false);
-
 
   const scrollViewHeight = useRef(new Animated.Value(0)).current;
 
@@ -54,7 +53,7 @@ const Scanner: React.FC = () => {
           useNativeDriver: false,
         }),
         Animated.timing(scrollViewHeight, {
-          toValue: camera ? 360: 560,
+          toValue: camera ? 360 : 560,
           duration: 300,
           easing: Easing.linear,
           useNativeDriver: false,
@@ -68,9 +67,6 @@ const Scanner: React.FC = () => {
       })
     ]).start();
   }, [camera, scrollViewHeight, heightAnim, marginAnim, opacityAnim]);
-  
-
-  
 
   if (permission === null) {
     return (
@@ -101,17 +97,18 @@ const Scanner: React.FC = () => {
         try {
           const product = await getProductByBarCode(data);
           Vibration.vibrate(100); // Vibra per 100 millisecondi
-  
           if (product) {
             setLista(prevLista => [...prevLista, product]);
             setProdotto(product);
             setBarCode(data);
+            setData(data); // Imposta il codice a barre trovato
             setNotFound(false);
           } else {
             if (!notFound) {
               setNotFound(true);
               setProdotto(undefined);
               setBarCode(data);
+              setData(data); // Imposta il codice a barre trovato
             }
           }
         } finally {
@@ -134,11 +131,11 @@ const Scanner: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {lista.reverse().map((p, index) => (
-    <SchedaProdottoTimeLine key={index} prodotto={p} colore={scalaColore[index >= scalaColore.length ? scalaColore.length - 1 : index]}/>
-  ))}
+          <SchedaProdottoTimeLine key={index} prodotto={p} colore={scalaColore[index >= scalaColore.length ? scalaColore.length - 1 : index]}/>
+        ))}
       </Animated.ScrollView>
       <View style={styles.container}>
-        <SchedaProdotto prodotto={prodotto} isNew={notFound}/>
+        <SchedaProdotto prodotto={prodotto} isNew={notFound} barCode={dataB ? dataB : 'nessun codice a barre'}/>
         <Animated.View style={[styles.barCodeBox, { height: heightAnim, marginBottom: marginAnim }]}>
           {camera && <BarCodeScanner onBarCodeScanned={handleBarCodeScanner} style={StyleSheet.absoluteFillObject} />}
         </Animated.View>
