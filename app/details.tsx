@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     list: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 25,
         paddingBottom: 80,  // Added padding bottom to avoid hiding the last element
     },
 });

@@ -13,4 +13,5 @@ export interface prodottoveryveg {
     description: string;
     vegan: boolean;
     vegetarian: boolean;
+    ingredients: [];
 }
