@@ -15,3 +15,9 @@ export interface prodottoveryveg {
     vegetarian: boolean;
     ingredients: [];
 }
+
+export interface ProductFoodFacts {
+    code: string;
+    stores_tags: [];
+    image_front_url: string;
+}
