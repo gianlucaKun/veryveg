@@ -23,14 +23,29 @@ export const getProductByBarCode = async (barcode : string): Promise<prodottover
 
 export const getProductFromApi = async (barcode: string) => {
     try {
-        const response = await axios.get(`https://world.openfoodfacts.org/api/v3/product/${barcode}.json`);
-        console.log("risposta api ", response.data);
-        return response.data;
-    } catch (e) {
-        console.error("Errore durante il recupero del prodotto da API: " + barcode);
-        throw e;
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      
+      if (!response.ok) {
+        // Log l'errore
+        console.error(`API Error: ${response.statusText}`);
+        return null;
+      }
+      
+      const data = await response.json();
+  
+      if (data && data.product) {
+        return data;
+      } else {
+        // Log se il prodotto non è stato trovato
+        console.warn(`Product not found for barcode: ${barcode}`);
+        return null;
+      }
+    } catch (error) {
+      // Log errori di rete o di parsing
+      console.error(`Error fetching product: ${barcode}`);
+      return null;
     }
-}
+  };
 
 export const addProduct = async (product: prodottoveryveg): Promise<prodottoveryveg> => {
     try {
