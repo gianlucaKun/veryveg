@@ -145,7 +145,7 @@ const Scanner: React.FC = () => {
               setProdotto(newProduct);
               setBarCode(data);
               setNotFound(false);
-              setFormVisible(false); // Chiudi il form se trovato tramite API
+              setFormVisible(true);
 
               // Aggiungi il prodotto al tuo database
               await addProduct(newProduct);
