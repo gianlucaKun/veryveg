@@ -21,6 +21,17 @@ export const getProductByBarCode = async (barcode : string): Promise<prodottover
     }
 }
 
+export const getProductFromApi = async (barcode: string) => {
+    try {
+        const response = await axios.get(`https://world.openfoodfacts.org/api/v3/product/${barcode}.json`);
+        console.log("risposta api ", response.data);
+        return response.data;
+    } catch (e) {
+        console.error("Errore durante il recupero del prodotto da API: " + barcode);
+        throw e;
+    }
+}
+
 export const addProduct = async (product: prodottoveryveg): Promise<prodottoveryveg> => {
     try {
         console.log ("product: ", product);

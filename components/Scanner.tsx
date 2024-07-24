@@ -1,15 +1,30 @@
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { StatusBar } from 'expo-status-bar';
-import { Button, Dimensions, StyleSheet, Text, View, Animated, Easing, Vibration } from 'react-native';
-import Bottone from './custom/bottone';
-import React, { useState, useEffect, useRef } from 'react';
-import { Feather } from '@expo/vector-icons';
-import GuideCamera from '@/assets/cameraGuide/guideCamera';
-import SchedaProdotto from './schede/SchedaProdotto';
-import SchedaProdottoTimeLine, { scalaColore } from './schede/SchedaProdottoTimeline';
-import ProductForm from './forms/ProductForm';
-import { getProductByBarCode, addProduct } from '@/services/ProductAPI'; // Importa la funzione per aggiungere il prodotto
-import { prodotto, prodottoveryveg } from '@/models/products';
+import { BarCodeScanner } from "expo-barcode-scanner";
+import { StatusBar } from "expo-status-bar";
+import {
+  Button,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+  Easing,
+  Vibration,
+} from "react-native";
+import Bottone from "./custom/bottone";
+import React, { useState, useEffect, useRef } from "react";
+import { Feather } from "@expo/vector-icons";
+import GuideCamera from "@/assets/cameraGuide/guideCamera";
+import SchedaProdotto from "./schede/SchedaProdotto";
+import SchedaProdottoTimeLine, {
+  scalaColore,
+} from "./schede/SchedaProdottoTimeline";
+import ProductForm from "./forms/ProductForm";
+import {
+  getProductByBarCode,
+  addProduct,
+  getProductFromApi,
+} from "@/services/ProductAPI"; // Importa la funzione per aggiungere il prodotto
+import { prodotto, prodottoveryveg } from "@/models/products";
 
 const Scanner: React.FC = () => {
   const [permission, setPermission] = useState<boolean | null>(null);
@@ -32,7 +47,7 @@ const Scanner: React.FC = () => {
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setPermission(status === 'granted');
+      setPermission(status === "granted");
     })();
   }, []);
 
@@ -56,14 +71,14 @@ const Scanner: React.FC = () => {
           duration: 300,
           easing: Easing.linear,
           useNativeDriver: false,
-        })
+        }),
       ]),
       Animated.timing(opacityAnim, {
         toValue: camera ? 1 : 0,
         duration: 300,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ]).start();
   }, [camera, scrollViewHeight, heightAnim, marginAnim, opacityAnim]);
 
@@ -82,8 +97,14 @@ const Scanner: React.FC = () => {
     );
   }
 
-  const handleBarCodeScanner = async ({ type, data }: { type: string; data: string }) => {
-    if (type.startsWith('org.gs1.EAN')) {
+  const handleBarCodeScanner = async ({
+    type,
+    data,
+  }: {
+    type: string;
+    data: string;
+  }) => {
+    if (type.startsWith("org.gs1.EAN")) {
       if (data !== barCode) {
         if (addingProduct) {
           return;
@@ -92,20 +113,49 @@ const Scanner: React.FC = () => {
         setAddingProduct(true);
 
         try {
+          // controlla se prodotto presente nel DB Mongo
           const product = await getProductByBarCode(data);
-          Vibration.vibrate(100);
 
           if (product) {
-            setLista(prevLista => [...prevLista, product]);
+            Vibration.vibrate(100);
+            setLista((prevLista) => [...prevLista, product]);
             setProdotto(product);
             setBarCode(data);
             setNotFound(false);
           } else {
-            if (!notFound) {
-              setNotFound(true);
-              setProdotto(undefined);
+            // Se non trovato nel database, controlla l'API di Open Food Facts
+            const apiProduct = await getProductFromApi(data);
+
+            if (apiProduct && apiProduct.product) {
+              const productFromApi = apiProduct.product;
+
+              // Crea un oggetto conforme al tipo `prodottoveryveg`
+              const newProduct: prodottoveryveg = {
+                name: productFromApi.product_name || "",
+                barcode: productFromApi.code || data,
+                description: productFromApi.description || "",
+                vegan: productFromApi.vegan === "yes",
+                vegetarian: productFromApi.vegetarian === "yes",
+                ingredients: productFromApi.ingredients_text
+                  ? [{ name: productFromApi.ingredients_text }]
+                  : [],
+              };
+
+              setLista((prevLista) => [...prevLista, newProduct]);
+              setProdotto(newProduct);
               setBarCode(data);
-              setFormVisible(true); // mostra il form quando il prodotto non viene trovato
+              setNotFound(false);
+              setFormVisible(false); // Chiudi il form se trovato tramite API
+
+              // Aggiungi il prodotto al tuo database
+              await addProduct(newProduct);
+            } else {
+              if (!notFound) {
+                setNotFound(true);
+                setProdotto(undefined);
+                setBarCode(data);
+                setFormVisible(true); // mostra il form quando il prodotto non viene trovato
+              }
             }
           }
         } finally {
@@ -123,12 +173,12 @@ const Scanner: React.FC = () => {
   const handleProductSubmit = async (newProduct: prodottoveryveg) => {
     try {
       await addProduct(newProduct); // Invio del prodotto al backend
-      setLista(prevLista => [...prevLista, newProduct]);
+      setLista((prevLista) => [...prevLista, newProduct]);
       setProdotto(newProduct);
       setNotFound(false);
       setFormVisible(false); // chiudi il form dopo l'aggiunta del prodotto
     } catch (error) {
-      console.error('Errore durante l\'aggiunta del prodotto:', error);
+      console.error("Errore durante l'aggiunta del prodotto:", error);
     }
   };
 
@@ -139,9 +189,13 @@ const Scanner: React.FC = () => {
   };
 
   return (
-    <View style={{ width: '100%', alignItems: 'center' }}>
+    <View style={{ width: "100%", alignItems: "center" }}>
       {formVisible ? (
-        <ProductForm barcode={barCode!} onSubmit={handleProductSubmit} onClose={handleCloseForm} />
+        <ProductForm
+          barcode={barCode!}
+          onSubmit={handleProductSubmit}
+          onClose={handleCloseForm}
+        />
       ) : (
         <>
           <Animated.ScrollView
@@ -149,13 +203,31 @@ const Scanner: React.FC = () => {
             showsVerticalScrollIndicator={false}
           >
             {lista.reverse().map((p, index) => (
-              <SchedaProdottoTimeLine key={index} prodotto={p} colore={scalaColore[index >= scalaColore.length ? scalaColore.length - 1 : index]} />
+              <SchedaProdottoTimeLine
+                key={index}
+                prodotto={p}
+                colore={
+                  scalaColore[
+                    index >= scalaColore.length ? scalaColore.length - 1 : index
+                  ]
+                }
+              />
             ))}
           </Animated.ScrollView>
           <View style={styles.container}>
             <SchedaProdotto prodotto={prodotto} isNew={notFound} />
-            <Animated.View style={[styles.barCodeBox, { height: heightAnim, marginBottom: marginAnim }]}>
-              {camera && <BarCodeScanner onBarCodeScanned={handleBarCodeScanner} style={StyleSheet.absoluteFillObject} />}
+            <Animated.View
+              style={[
+                styles.barCodeBox,
+                { height: heightAnim, marginBottom: marginAnim },
+              ]}
+            >
+              {camera && (
+                <BarCodeScanner
+                  onBarCodeScanned={handleBarCodeScanner}
+                  style={StyleSheet.absoluteFillObject}
+                />
+              )}
             </Animated.View>
             {camera ? (
               <>
@@ -163,14 +235,16 @@ const Scanner: React.FC = () => {
                   <GuideCamera />
                 </Animated.View>
                 <Bottone
-                  testo='Chiudi fotocamera'
-                  icona={<Feather name="camera-off" size={36} color="#926FFF" />}
+                  testo="Chiudi fotocamera"
+                  icona={
+                    <Feather name="camera-off" size={36} color="#926FFF" />
+                  }
                   onClick={() => setCamera(false)}
                 />
               </>
             ) : (
               <Bottone
-                testo='Inizia a scansionare'
+                testo="Inizia a scansionare"
                 icona={<Feather name="camera" size={36} color="#926FFF" />}
                 onClick={() => setCamera(true)}
               />
@@ -186,26 +260,26 @@ export default Scanner;
 
 const styles = StyleSheet.create({
   barCodeBox: {
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: Dimensions.get('window').width * 0.9,
-    overflow: 'hidden',
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+    width: Dimensions.get("window").width * 0.9,
+    overflow: "hidden",
     borderRadius: 35,
   },
   permissionContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   container: {
-    backgroundColor: '#926FFF',
+    backgroundColor: "#926FFF",
     padding: 10,
     borderRadius: 35,
   },
   scroll: {
-    width: Dimensions.get('window').width * 0.9,
-    flexDirection: 'column',
-    position: 'relative',
+    width: Dimensions.get("window").width * 0.9,
+    flexDirection: "column",
+    position: "relative",
   },
 });
