@@ -1,191 +1,134 @@
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { StatusBar } from 'expo-status-bar';
-import { Button, Dimensions, StyleSheet, Text, View, Animated, Easing, Vibration } from 'react-native';
-import Bottone from './custom/bottone';
 import React, { useState, useEffect, useRef } from 'react';
-import { Feather } from '@expo/vector-icons';
-import GuideCamera from '@/assets/cameraGuide/guideCamera';
-import SchedaProdotto from './schede/SchedaProdotto';
-import SchedaProdottoTimeLine, { scalaColore } from './schede/SchedaProdottoTimeline';
+import { View, Text, StyleSheet, Button, Dimensions, PanResponder, Animated, ScrollView } from 'react-native';
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import SchedaProdotto from './Schede/schedaProdotto';
 
-import { getProductByBarCode } from '@/services/ProductAPI';
-import { prodotto, prodottoveryveg } from '@/models/products';
+type BarCodeEvent = {
+    type: string;
+    data: string;
+};
 
 const Scanner: React.FC = () => {
-  const [permission, setPermission] = useState<boolean | null>(null);
-  const [scanner, setScanner] = useState<boolean>(false);
-  const [prodotto, setProdotto] = useState<prodottoveryveg>();
-  const [camera, setCamera] = useState<boolean>(true);
-  const [barCode, setBarCode] = useState<string>();
-  const [notFound, setNotFound] = useState<boolean>(false);
-  const [dataB, setData] = useState<string>();
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+    const [scanned, setScanned] = useState<boolean>(false);
+    const [code, setCode] = useState<string>('Not yet scanned');
 
-  const [lista, setLista] = useState<prodottoveryveg[]>([]); //lista ultimi codici scansionati
-  const [addingProduct, setAddingProduct] = useState(false);
 
-  const scrollViewHeight = useRef(new Animated.Value(0)).current;
+    // logica per l'animazione
+    const [isSchedaUp, setIsSchedaUp] = useState<boolean>(false);
+    const [schedaRaised, setSchedaRaised] = useState<boolean>(false);
 
-  // Animated values for height, marginBottom, and opacity transitions
-  const heightAnim = useRef(new Animated.Value(0)).current;
-  const marginAnim = useRef(new Animated.Value(10)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+    const schedaTop = useRef(new Animated.Value(Dimensions.get('window').height - 350)).current;
+    const screenHeight = Dimensions.get('window').height;
+    const schedaHeight = 350;
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setPermission(status === 'granted');
-    })();
-  }, []);
+    const minTop = screenHeight - schedaHeight;
+    const maxTop = screenHeight - 800;
+    const speedThreshold = 0.5; // Soglia di velocità per considerare il movimento rapido
 
-  useEffect(() => {
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(heightAnim, {
-          toValue: camera ? 200 : 0,
-          duration: 300,
-          easing: Easing.linear,
-          useNativeDriver: false,
-        }),
-        Animated.timing(marginAnim, {
-          toValue: camera ? 10 : 0,
-          duration: 300,
-          easing: Easing.linear,
-          useNativeDriver: false,
-        }),
-        Animated.timing(scrollViewHeight, {
-          toValue: camera ? 360 : 560,
-          duration: 300,
-          easing: Easing.linear,
-          useNativeDriver: false,
-        })
-      ]),
-      Animated.timing(opacityAnim, {
-        toValue: camera ? 1 : 0,
-        duration: 300,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ]).start();
-  }, [camera, scrollViewHeight, heightAnim, marginAnim, opacityAnim]);
-
-  if (permission === null) {
-    return (
-      <View style={styles.permissionContainer}>
-        <Text>Richiesta di autorizzazione della fotocamera</Text>
-      </View>
-    );
-  }
-  if (permission === false) {
-    return (
-      <View style={styles.permissionContainer}>
-        <Text>Nessun accesso alla fotocamera</Text>
-      </View>
-    );
-  }
-
-  const handleBarCodeScanner = async ({ type, data }: { type: string; data: string }) => {
-    if (type.startsWith('org.gs1.EAN')) {
-      // Verifica se il codice a barre scansionato è diverso da quello già memorizzato
-      if (data !== barCode) {
-        // Blocco aggiunta prodotto per un breve periodo
-        if (addingProduct) {
-          return; // Esce se stiamo già aggiungendo un prodotto
-        }
-  
-        setAddingProduct(true); // Imposta il flag di aggiunta prodotto
-  
+    const askForCameraPermission = async () => {
         try {
-          const product = await getProductByBarCode(data);
-          Vibration.vibrate(100); // Vibra per 100 millisecondi
-          if (product) {
-            setLista(prevLista => [...prevLista, product]);
-            setProdotto(product);
-            setBarCode(data);
-            setData(data); // Imposta il codice a barre trovato
-            setNotFound(false);
-          } else {
-            if (!notFound) {
-              setNotFound(true);
-              setProdotto(undefined);
-              setBarCode(data);
-              setData(data); // Imposta il codice a barre trovato
-            }
-          }
-        } finally {
-          // Resetta il flag di aggiunta prodotto dopo un breve ritardo
-          setTimeout(() => {
-            setAddingProduct(false);
-          }, 1000); // Tempo in millisecondi per evitare nuove aggiunte rapide
+            const { status } = await BarCodeScanner.requestPermissionsAsync();
+            setHasPermission(status === 'granted');
+        } catch (error) {
+            console.error("Errore nella richiesta dei permessi:", error);
         }
-      }
-    } else {
-      setProdotto(undefined);
-      setBarCode(undefined);
-    }
-  };
+    };
 
-  return (
-    <View style={{ width: '100%', alignItems: 'center' }}>
-      <Animated.ScrollView
-        style={[styles.scroll, { height: scrollViewHeight }]}
-        showsVerticalScrollIndicator={false}
-      >
-        {lista.reverse().map((p, index) => (
-          <SchedaProdottoTimeLine key={index} prodotto={p} colore={scalaColore[index >= scalaColore.length ? scalaColore.length - 1 : index]}/>
-        ))}
-      </Animated.ScrollView>
-      <View style={styles.container}>
-        <SchedaProdotto prodotto={prodotto} isNew={notFound} barCode={dataB ? dataB : 'nessun codice a barre'}/>
-        <Animated.View style={[styles.barCodeBox, { height: heightAnim, marginBottom: marginAnim }]}>
-          {camera && <BarCodeScanner onBarCodeScanned={handleBarCodeScanner} style={StyleSheet.absoluteFillObject} />}
-        </Animated.View>
-        {camera ? (
-          <>
-            <Animated.View style={{ opacity: opacityAnim }}>
-              <GuideCamera />
-            </Animated.View>
-            <Bottone
-              testo='Chiudi fotocamera'
-              icona={<Feather name="camera-off" size={36} color="#926FFF" />}
-              onClick={() => setCamera(false)}
+
+
+    const panResponder = useRef(
+        PanResponder.create({
+            onMoveShouldSetPanResponder: (evt, gestureState) => {
+                return Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+            },
+            onPanResponderMove: (_, { dy }) => {
+                // Nessuna azione durante il movimento, attendiamo il rilascio
+            },
+            onPanResponderRelease: (_, { dy, vy }) => {
+                if (Math.abs(vy) > speedThreshold) {
+                    let snapToPosition;
+                    if (isSchedaUp) {
+                        snapToPosition = dy < 0 ? minTop : maxTop;
+                    } else {
+                        snapToPosition = dy > 0 ? minTop : maxTop;
+                    }
+
+                    // Aggiorna lo stato prima dell'animazione
+                    const isRaised = snapToPosition === minTop;
+                    setSchedaRaised(isRaised);
+                    setIsSchedaUp(isRaised);
+
+                    Animated.spring(schedaTop, {
+                        toValue: snapToPosition,
+                        useNativeDriver: false,
+                    }).start();
+                }
+            },
+        })
+    ).current;
+
+    //logica scanner
+    useEffect(() => {
+        askForCameraPermission();
+    }, []);
+
+    const handleBarCodeScanned = ({ data }: BarCodeEvent) => {
+        setScanned(true);
+        setCode(data);
+    };
+
+    if (hasPermission === null) {
+        return (
+            <View style={styles.container}>
+                <Text>Richiesta di permesso per la fotocamera</Text>
+            </View>
+        );
+    }
+
+    if (hasPermission === false) {
+        return (
+            <View style={styles.container}>
+                <Text style={{ margin: 10 }}>Nessun accesso alla fotocamera</Text>
+                <Button title={'Consenti Fotocamera'} onPress={askForCameraPermission} />
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <BarCodeScanner
+                onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                style={StyleSheet.absoluteFillObject}
             />
-          </>
-        ) : (
-          <Bottone
-            testo='Inizia a scansionare'
-            icona={<Feather name="camera" size={36} color="#926FFF" />}
-            onClick={() => setCamera(true)}
-          />
-        )}
-      </View>
-    </View>
-  );
+            {scanned && (
+                <>
+                <Button title={'Tocca per scansionare di nuovo'} onPress={() => setScanned(false)} />
+                <Animated.View
+                style={[styles.scheda, { top: schedaTop }]}
+                {...panResponder.panHandlers}
+            >
+                <ScrollView>
+                    <SchedaProdotto codice={code} isComplete={schedaRaised} />
+                </ScrollView>
+                </Animated.View>
+                </>
+            )}
+        </View>
+    );
 };
 
 export default Scanner;
 
 const styles = StyleSheet.create({
-  barCodeBox: {
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: Dimensions.get('window').width * 0.9,
-    overflow: 'hidden',
-    borderRadius: 35,
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    backgroundColor: '#926FFF',
-    padding: 10,
-    borderRadius: 35,
-  },
-  scroll:{
-    width: Dimensions.get('window').width*0.9,
-    flexDirection: 'column',
-    position:'relative',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        width: Dimensions.get('window').width,
+    },
+    scheda: {
+        position: 'absolute',
+    },
 });

@@ -1,40 +1,38 @@
-import TabBar from '@/components/TabBar';
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+import 'react-native-reanimated';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
-const Layout = () => {
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
   return (
-    <Tabs
-      initialRouteName="scansiona"
-      tabBar={props => <TabBar {...props} />}
-    >
-      <Tabs.Screen 
-        name="details"
-        options={{
-          title: "",
-        }}
-      />
-      <Tabs.Screen 
-        name="scansiona"
-        options={{
-          title: "",
-        }}
-      />
-      <Tabs.Screen 
-        name="home"
-        options={{
-          title: "",
-        }}
-      />
-      <Tabs.Screen 
-        name="hiddenDatails"
-        options={{
-          title: "",
-          href: null,
-        }}
-      />
-    </Tabs>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+        <Stack.Screen name="paginaIngredienti" />
+        <Stack.Screen name="paginaConfronta"/>
+      </Stack>
+    </ThemeProvider>
   );
-};
-
-export default Layout;
+}

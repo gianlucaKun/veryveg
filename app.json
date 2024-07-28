@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "veryveg",
-    "slug": "veryveg",
+    "name": "VeryVeg",
+    "scheme": "VeryVeg",
+    "slug": "VeryVeg",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -31,20 +31,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "router": {
-        "routes": [
-          {
-            "path": "/",
-            "component": "./home/Home"
-          },
-          {
-            "path": "/hiddenPages/HiddenPage",
-            "component": "./hiddenPages/HiddenPage"
-          }
-        ]
-      }
     }
   }
 }
