@@ -46,6 +46,7 @@ const DetailsScreen: React.FC = () => {
                 <Button title="Ricevi prodotti" onPress={getProductV2} />
                 <Text style={styles.title}>Lista prodotti scansionati</Text>
                 <FlatList
+                style={styles.containerProducts}
                     data={lista}
                     keyExtractor={(item) => item.barcode || item.name}
                     renderItem={({ item }) => (
@@ -87,6 +88,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 25,
         paddingBottom: 80,  // Added padding bottom to avoid hiding the last element
     },
+containerProducts: {
+    width: width,
+    marginHorizontal: 25,
+},
 });
 
 export default DetailsScreen;
