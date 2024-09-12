@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Configura l'URL base del server backend
-const baseUrl = "http://192.168.1.11:8080/jwt"; // Cambia con il tuo endpoint
+const baseUrl = "http://192.168.1.13:8080/jwt"; // Cambia con il tuo endpoint
 
 // Funzione per il login dell'utente
 export const loginUser = async (email: string, password: string): Promise<any> => {
